@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wget -q -O /dev/null --server-response http://localhost:3000/)",
+      "Bash(echo \"trying fetch...\" /usr/bin/python3 -c \":*)",
+      "Bash(kill %1)"
+    ]
+  }
+}
