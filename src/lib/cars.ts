@@ -28,6 +28,46 @@ export interface Car {
   trending?: boolean;
 }
 
+const manufacturerUrls: Record<string, string> = {
+  Toyota: "https://www.toyota.com",
+  Honda: "https://www.honda.com",
+  Tesla: "https://www.tesla.com",
+  Ford: "https://www.ford.com",
+  BMW: "https://www.bmwusa.com",
+  "Mercedes-Benz": "https://www.mbusa.com",
+  Chevrolet: "https://www.chevrolet.com",
+  Kia: "https://www.kia.com/us",
+  Jeep: "https://www.jeep.com",
+  Porsche: "https://www.porsche.com/usa",
+  Hyundai: "https://www.hyundaiusa.com",
+  Subaru: "https://www.subaru.com",
+  RAM: "https://www.ramtrucks.com",
+  Rivian: "https://www.rivian.com",
+  Mazda: "https://www.mazdausa.com",
+  Volvo: "https://www.volvocars.com/us",
+  Lexus: "https://www.lexus.com",
+  Audi: "https://www.audiusa.com",
+  Genesis: "https://www.genesis.com/us",
+  "Land Rover": "https://www.landroverusa.com",
+  Ferrari: "https://www.ferrari.com/en-US",
+  Nissan: "https://www.nissanusa.com",
+};
+
+export function getManufacturerUrl(make: string): string {
+  return manufacturerUrls[make] ?? `https://www.google.com/search?q=${encodeURIComponent(make + " official site")}`;
+}
+
+export function getDealerSearchUrl(car: Car): string {
+  const q = encodeURIComponent(`${car.year} ${car.make} ${car.model}`);
+  return `https://www.cars.com/shopping/results/?keyword=${q}&stock_type=all`;
+}
+
+export function getCarGurusUrl(car: Car): string {
+  const make = encodeURIComponent(car.make.toLowerCase().replace(/[-\s]/g, "_"));
+  const model = encodeURIComponent(car.model.toLowerCase().replace(/[-\s/]/g, "_").split(" ")[0]);
+  return `https://www.cargurus.com/Cars/new/nl?zip=&trim=&mileage=&sortDir=ASC&action=search&types%5B%5D=${car.condition === "New" ? "new" : "used"}`;
+}
+
 export const cars: Car[] = [
   {
     id: "2024-toyota-camry-xse",
@@ -340,7 +380,7 @@ export const cars: Car[] = [
     horsepower: 225,
     transmission: "Single-Speed",
     drivetrain: "RWD",
-    origin: "Japan",
+    origin: "Korea",
     color: "Snow White Pearl",
     interiorColor: "Pebble Gray",
     interiorMaterial: "Faux Leather",
@@ -421,7 +461,7 @@ export const cars: Car[] = [
     horsepower: 168,
     transmission: "Single-Speed",
     drivetrain: "RWD",
-    origin: "Japan",
+    origin: "Korea",
     color: "Atlas White",
     interiorColor: "Dark Pebble Gray",
     interiorMaterial: "Faux Leather",
@@ -826,7 +866,7 @@ export const cars: Car[] = [
     horsepower: 612,
     transmission: "Automatic",
     drivetrain: "RWD",
-    origin: "Germany",
+    origin: "Italy",
     color: "Rosso Roma",
     interiorColor: "Cuoio",
     interiorMaterial: "Leather",

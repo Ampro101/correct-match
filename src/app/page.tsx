@@ -110,13 +110,12 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full py-24">
-          <div className="max-w-3xl">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 w-full py-24 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-subtle bg-card mb-6 text-sm text-muted"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-subtle bg-card mb-6 text-sm font-medium text-[#5a4a38] dark:text-[#9c8a72]"
             >
               <Sparkles size={14} className="text-gold" />
               <span>30+ vehicles matched to your lifestyle</span>
@@ -126,7 +125,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold leading-[1.08] tracking-tight mb-6 text-[#2d2926] dark:text-[#e4ddd4]"
+              className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold leading-[1.08] tracking-tight mb-5 text-[#2d2926] dark:text-[#e4ddd4]"
             >
               Find the car
               <br />
@@ -137,9 +136,9 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="text-lg text-muted max-w-xl mb-10 leading-relaxed"
+              className="text-lg text-[#5a4a38] dark:text-[#9c8a72] max-w-xl mx-auto mb-10 leading-relaxed"
             >
-              CarFect Match analyzes your lifestyle, budget, and preferences to surface vehicles that truly fit — not just what's popular.
+              CarFect Match analyzes your lifestyle, budget, and preferences to surface vehicles that truly fit — not just what&apos;s popular.
             </motion.p>
 
             {/* Search bar */}
@@ -147,15 +146,15 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative max-w-xl"
+              className="relative max-w-xl mx-auto"
             >
-              <div className="relative flex items-center bg-card rounded-2xl border border-subtle shadow-card overflow-hidden">
-                <Search size={18} className="absolute left-4 text-muted pointer-events-none" />
+              <div className="relative flex items-center bg-white dark:bg-[#242118] rounded-2xl border border-[#a07850]/25 dark:border-[#cba070]/20 shadow-[0_4px_28px_rgba(45,41,38,0.10)] dark:shadow-[0_4px_28px_rgba(0,0,0,0.35)] overflow-hidden">
+                <Search size={18} className="absolute left-4 text-[#8b7355] dark:text-[#9c8a72] pointer-events-none" />
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={`${placeholder}|`}
-                  className="w-full pl-11 pr-28 py-4 bg-transparent text-[#2d2926] dark:text-[#e4ddd4] placeholder-[#8b7355] text-sm outline-none"
+                  className="w-full pl-11 pr-28 py-4 bg-transparent text-[#2d2926] dark:text-[#e4ddd4] placeholder-[#a09080] dark:placeholder-[#7a6a5a] text-sm outline-none"
                 />
                 <Link
                   href={`/browse?q=${encodeURIComponent(searchQuery)}`}
@@ -171,12 +170,12 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-wrap items-center gap-3 mt-5"
+              className="flex flex-wrap items-center justify-center gap-3 mt-6"
             >
               <Link href="/quiz" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white gold-gradient hover:opacity-90 transition-opacity shadow-sm">
                 <Sparkles size={15} /> Take the Match Quiz
               </Link>
-              <Link href="/browse" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border border-subtle hover:bg-[#a07850]/8 dark:hover:bg-[#cba070]/8 transition-colors text-[#2d2926] dark:text-[#e4ddd4]">
+              <Link href="/browse" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-white dark:bg-[#242118] border border-[#a07850]/30 dark:border-[#cba070]/25 hover:border-[#a07850]/60 transition-colors text-[#2d2926] dark:text-[#e4ddd4] shadow-sm">
                 Browse All Cars <ChevronRight size={15} />
               </Link>
             </motion.div>
@@ -186,16 +185,15 @@ export default function HomePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-wrap items-center gap-6 mt-10 text-sm text-muted"
+              className="flex flex-wrap items-center justify-center gap-8 mt-12"
             >
-              {[{ label: "Vehicles matched", value: "30+" }, { label: "Filter categories", value: "8" }, { label: "Match accuracy", value: "94%" }].map(({ label, value }) => (
-                <div key={label} className="flex items-center gap-2">
-                  <span className="font-bold text-[#2d2926] dark:text-[#e4ddd4] text-base">{value}</span>
-                  <span>{label}</span>
+              {[{ label: "Vehicles catalogued", value: "30+" }, { label: "Filter dimensions", value: "8" }, { label: "Match accuracy", value: "94%" }].map(({ label, value }) => (
+                <div key={label} className="text-center">
+                  <p className="font-bold text-[#2d2926] dark:text-[#e4ddd4] text-2xl font-serif">{value}</p>
+                  <p className="text-xs text-[#5a4a38] dark:text-[#9c8a72] mt-0.5">{label}</p>
                 </div>
               ))}
             </motion.div>
-          </div>
         </div>
       </section>
 

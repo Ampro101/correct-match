@@ -11,7 +11,7 @@ const budgetOptions = ["Under $15k", "$15k-$25k", "$25k-$40k", "$40k-$60k", "$60
 const bodyStyles = ["SUV - Large", "SUV - Compact", "Sedan", "Coupe - 2-Door", "Coupe - 4-Door", "Convertible", "Hatchback", "Van/Minivan", "Truck"];
 const conditions = ["New", "Used", "Certified Pre-Owned"];
 const engines = ["Gas - 4-Cylinder", "Gas - V6", "Gas - V8", "Electric", "Hybrid (Gas/Plug-in)", "Diesel"];
-const origins = ["USA", "Japan", "Germany", "Britain", "Sweden"];
+const origins = ["USA", "Japan", "Germany", "Korea", "Britain", "Sweden", "Italy"];
 const performances = ["Comfort", "Sport", "Off-road", "Eco-friendly"];
 const passengers = [2, 4, 5, 7, 8];
 

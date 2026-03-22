@@ -5,7 +5,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   Star,
   Fuel,
   Zap,
@@ -16,9 +15,12 @@ import {
   ChevronRight,
   BarChart2,
   Sparkles,
+  ExternalLink,
+  Search,
 } from "lucide-react";
-import { getCarById, cars, formatPrice } from "@/lib/cars";
+import { getCarById, cars, formatPrice, getManufacturerUrl, getDealerSearchUrl } from "@/lib/cars";
 import CarCard from "@/components/CarCard";
+import CarImagePlaceholder from "@/components/CarImagePlaceholder";
 
 export default function CarDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -52,13 +54,9 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#f0e8de] to-[#e2d5c5] dark:from-[#2a2520] dark:to-[#1e1c18] aspect-video flex items-center justify-center mb-5 border border-subtle"
+              className="rounded-2xl overflow-hidden mb-5 border border-subtle"
             >
-              <div className="text-center">
-                <div className="text-8xl mb-3">🚗</div>
-                <p className="text-sm text-muted">{car.year} {car.make} {car.model}</p>
-                <p className="text-xs text-muted mt-1">{car.color}</p>
-              </div>
+              <CarImagePlaceholder car={car} size="hero" />
             </motion.div>
 
             {/* Match score card */}
@@ -233,6 +231,49 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
                     <p className="font-medium text-[#2d2926] dark:text-[#e4ddd4]">{val}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* External links */}
+            <div className="bg-card rounded-2xl border border-subtle p-5 shadow-card mb-5">
+              <h4 className="text-sm font-semibold mb-3 text-[#2d2926] dark:text-[#e4ddd4]">Where to go next</h4>
+              <div className="space-y-2">
+                <a
+                  href={getManufacturerUrl(car.make)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between w-full px-4 py-3 rounded-xl border border-subtle hover:bg-[#a07850]/6 dark:hover:bg-[#cba070]/6 transition-colors group"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[#2d2926] dark:text-[#e4ddd4]">{car.make} Official Site</p>
+                    <p className="text-xs text-muted">Configure, price & locate dealers</p>
+                  </div>
+                  <ExternalLink size={15} className="text-muted group-hover:text-gold transition-colors" />
+                </a>
+                <a
+                  href={getDealerSearchUrl(car)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between w-full px-4 py-3 rounded-xl border border-subtle hover:bg-[#a07850]/6 dark:hover:bg-[#cba070]/6 transition-colors group"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[#2d2926] dark:text-[#e4ddd4]">Search on Cars.com</p>
+                    <p className="text-xs text-muted">Find this vehicle at dealers near you</p>
+                  </div>
+                  <ExternalLink size={15} className="text-muted group-hover:text-gold transition-colors" />
+                </a>
+                <a
+                  href={`https://www.cargurus.com/Cars/new/nl?zip=&trim=&mileage=&sortDir=ASC&action=search&types%5B%5D=${car.condition === "New" ? "new" : "used"}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between w-full px-4 py-3 rounded-xl border border-subtle hover:bg-[#a07850]/6 dark:hover:bg-[#cba070]/6 transition-colors group"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[#2d2926] dark:text-[#e4ddd4]">Search on CarGurus</p>
+                    <p className="text-xs text-muted">Compare prices & dealer ratings</p>
+                  </div>
+                  <ExternalLink size={15} className="text-muted group-hover:text-gold transition-colors" />
+                </a>
               </div>
             </div>
 
