@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, Sparkles, Check, SkipForward } from "lucide-react";
-import CarCard from "@/components/CarCard";
-import { cars } from "@/lib/cars";
+import { ChevronRight, ChevronLeft, Sparkles, Check, SkipForward, Loader2, AlertCircle } from "lucide-react";
+import AICarCard from "@/components/AICarCard";
+import { AIMatchResult } from "@/lib/ai-types";
 
 interface Step {
   id: string;
@@ -145,69 +144,13 @@ const steps: Step[] = [
 
 type Answers = Record<string, string | string[]>;
 
-function scoreCarForAnswers(car: typeof cars[0], answers: Answers): number {
-  let score = 68;
-
-  if (answers.primaryUse) {
-    const use = answers.primaryUse as string;
-    if (use === "commute" && (car.mpg || car.engine === "Electric") && car.passengers >= 4) score += 8;
-    if (use === "family" && car.passengers >= 5) score += 8;
-    if (use === "adventure" && car.performance === "Off-road") score += 10;
-    if (use === "luxury" && car.price >= 50000) score += 8;
-    if (use === "sport" && car.performance === "Sport") score += 10;
-    if (use === "eco" && (car.engine.includes("Electric") || car.engine.includes("Hybrid") || car.performance === "Eco-friendly")) score += 10;
-  }
-
-  if (answers.budget) {
-    const map: Record<string, [number, number]> = {
-      "Under $15k": [0, 15000], "$15k-$25k": [15000, 25000], "$25k-$40k": [25000, 40000],
-      "$40k-$60k": [40000, 60000], "$60k-$100k": [60000, 100000], "$100k+": [100000, Infinity],
-    };
-    const range = map[answers.budget as string];
-    if (range) {
-      if (car.price >= range[0] && car.price <= range[1]) score += 12;
-      else if (car.price < range[0]) score += 3;
-      else score -= 6;
-    }
-  }
-
-  if (answers.bodyStyle && Array.isArray(answers.bodyStyle)) {
-    if (answers.bodyStyle.some((b) => car.bodyStyle.includes(b))) score += 8;
-  }
-
-  if (answers.passengers) {
-    const needed = parseInt(answers.passengers as string);
-    if (car.passengers >= needed) score += 5;
-    else score -= 4;
-  }
-
-  if (answers.engine && Array.isArray(answers.engine)) {
-    if (answers.engine.some((e) => car.engine.includes(e))) score += 7;
-  }
-
-  if (answers.performance && car.performance === answers.performance) score += 6;
-
-  if (answers.condition && answers.condition !== "any" && car.condition === answers.condition) score += 4;
-
-  if (answers.origin && Array.isArray(answers.origin)) {
-    if (!answers.origin.includes("any") && answers.origin.includes(car.origin)) score += 5;
-    if (answers.origin.includes("any")) score += 2;
-  }
-
-  if (answers.features && Array.isArray(answers.features)) {
-    const matched = answers.features.filter((f) =>
-      car.features.some((cf) => cf.toLowerCase().includes(f.toLowerCase()) || f.toLowerCase().includes(cf.toLowerCase()))
-    );
-    score += Math.min(matched.length * 2, 10);
-  }
-
-  return Math.min(score, 99);
-}
-
 export default function QuizPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [completed, setCompleted] = useState(false);
+  const [aiResult, setAiResult] = useState<AIMatchResult | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const step = steps[currentStep];
   const progress = (currentStep / steps.length) * 100;
@@ -231,9 +174,32 @@ export default function QuizPage() {
 
   const canProceed = !!answers[step.id] && (Array.isArray(answers[step.id]) ? (answers[step.id] as string[]).length > 0 : true);
 
+  const submitToAI = async (finalAnswers: Answers) => {
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/ai-match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: finalAnswers }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Match failed");
+      setAiResult(data);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const next = () => {
-    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
-    else setCompleted(true);
+    if (currentStep < steps.length - 1) {
+      setCurrentStep((s) => s + 1);
+    } else {
+      setCompleted(true);
+      submitToAI(answers);
+    }
   };
 
   const back = () => {
@@ -241,16 +207,21 @@ export default function QuizPage() {
   };
 
   const skip = () => {
-    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
-    else setCompleted(true);
+    if (currentStep < steps.length - 1) {
+      setCurrentStep((s) => s + 1);
+    } else {
+      setCompleted(true);
+      submitToAI(answers);
+    }
   };
 
-  const results = completed
-    ? [...cars]
-        .map((car) => ({ car, score: scoreCarForAnswers(car, answers) }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 9)
-    : [];
+  const retake = () => {
+    setCompleted(false);
+    setCurrentStep(0);
+    setAnswers({});
+    setAiResult(null);
+    setAiError(null);
+  };
 
   if (completed) {
     return (
@@ -261,28 +232,117 @@ export default function QuizPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <div className="w-14 h-14 rounded-2xl gold-gradient flex items-center justify-center mx-auto mb-5 shadow-md">
-              <Sparkles size={24} className="text-white" />
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-serif font-bold mb-3 text-[#2d2926] dark:text-[#e4ddd4]">
-              Your top <span className="text-gold">matches</span>
-            </h1>
-            <p className="text-[#5a4a38] dark:text-[#9c8a72] text-base max-w-lg mx-auto">
-              Based on your answers, here are {results.length} vehicles ranked by compatibility with your preferences.
-            </p>
-            <button
-              onClick={() => { setCompleted(false); setCurrentStep(0); setAnswers({}); }}
-              className="mt-4 text-sm text-muted hover:text-gold transition-colors underline underline-offset-2"
-            >
-              Retake quiz
-            </button>
+            {aiLoading ? (
+              <>
+                <div className="w-14 h-14 rounded-2xl gold-gradient flex items-center justify-center mx-auto mb-5 shadow-md">
+                  <Loader2 size={24} className="text-white animate-spin" />
+                </div>
+                <h1 className="text-4xl font-serif font-bold mb-3 text-[#2d2926] dark:text-[#e4ddd4]">
+                  Finding your <span className="text-gold">matches...</span>
+                </h1>
+                <p className="text-[#5a4a38] dark:text-[#9c8a72] text-base max-w-lg mx-auto">
+                  Our AI is analyzing your preferences and searching for the perfect vehicles.
+                </p>
+              </>
+            ) : aiError ? (
+              <>
+                <div className="w-14 h-14 rounded-2xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-5">
+                  <AlertCircle size={24} className="text-red-500" />
+                </div>
+                <h1 className="text-3xl font-serif font-bold mb-3 text-[#2d2926] dark:text-[#e4ddd4]">Something went wrong</h1>
+                <p className="text-[#5a4a38] dark:text-[#9c8a72] text-sm max-w-md mx-auto mb-4">{aiError}</p>
+                <button
+                  onClick={() => submitToAI(answers)}
+                  className="px-6 py-2.5 rounded-xl gold-gradient text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                >
+                  Try again
+                </button>
+              </>
+            ) : aiResult ? (
+              <>
+                <div className="w-14 h-14 rounded-2xl gold-gradient flex items-center justify-center mx-auto mb-5 shadow-md">
+                  <Sparkles size={24} className="text-white" />
+                </div>
+                <h1 className="text-4xl sm:text-5xl font-serif font-bold mb-3 text-[#2d2926] dark:text-[#e4ddd4]">
+                  Your top <span className="text-gold">matches</span>
+                </h1>
+                <p className="text-[#5a4a38] dark:text-[#9c8a72] text-base max-w-2xl mx-auto">
+                  {aiResult.summary}
+                </p>
+                <button onClick={retake} className="mt-4 text-sm text-muted hover:text-gold transition-colors underline underline-offset-2">
+                  Retake quiz
+                </button>
+              </>
+            ) : null}
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {results.map(({ car, score }, i) => (
-              <CarCard key={car.id} car={car} matchScore={score} index={i} />
-            ))}
-          </div>
+          {/* Loading skeleton */}
+          {aiLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="rounded-[14px] border border-subtle bg-card overflow-hidden animate-pulse">
+                  <div className="h-44 bg-[#a07850]/8 dark:bg-[#cba070]/8" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-3 bg-[#a07850]/10 rounded w-1/3" />
+                    <div className="h-5 bg-[#a07850]/10 rounded w-2/3" />
+                    <div className="h-3 bg-[#a07850]/10 rounded w-full" />
+                    <div className="h-3 bg-[#a07850]/10 rounded w-5/6" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Top picks */}
+          {aiResult && (
+            <>
+              <div className="mb-10">
+                <h2 className="text-xl font-serif font-bold mb-5 text-[#2d2926] dark:text-[#e4ddd4]">
+                  <span className="text-gold">Top picks</span> for you
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {aiResult.topPicks.map((car, i) => (
+                    <AICarCard
+                      key={`top-${car.make}-${car.model}-${i}`}
+                      car={car}
+                      index={i}
+                      badge={i === 0 ? "Best Match" : i === 1 ? "Great Choice" : "Strong Pick"}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Advice */}
+              <div className="bg-card rounded-2xl border border-subtle p-5 mb-10 flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl gold-gradient flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Sparkles size={16} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#2d2926] dark:text-[#e4ddd4] mb-1">AI Advisor Note</p>
+                  <p className="text-sm text-muted leading-relaxed">{aiResult.advice}</p>
+                </div>
+              </div>
+
+              {/* Alternative picks */}
+              {aiResult.alternativePicks.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-serif font-bold mb-5 text-[#2d2926] dark:text-[#e4ddd4]">
+                    Worth considering
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {aiResult.alternativePicks.map((car, i) => (
+                      <AICarCard
+                        key={`alt-${car.make}-${car.model}-${i}`}
+                        car={car}
+                        index={i}
+                        badge="Alternative"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     );

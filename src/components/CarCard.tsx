@@ -11,9 +11,10 @@ interface CarCardProps {
   car: Car;
   matchScore?: number;
   index?: number;
+  hideScore?: boolean;
 }
 
-export default function CarCard({ car, matchScore, index = 0 }: CarCardProps) {
+export default function CarCard({ car, matchScore, index = 0, hideScore = false }: CarCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
@@ -33,7 +34,7 @@ export default function CarCard({ car, matchScore, index = 0 }: CarCardProps) {
     setHovered(false);
   };
 
-  const score = matchScore ?? Math.floor(Math.random() * 22 + 74);
+  const score = matchScore ?? (hideScore ? null : Math.floor(Math.random() * 22 + 74));
   const isElectric = car.engine === "Electric";
   const isHybrid = car.engine.includes("Hybrid");
 
@@ -74,13 +75,15 @@ export default function CarCard({ car, matchScore, index = 0 }: CarCardProps) {
           <div className="relative">
             <CarImagePlaceholder car={car} />
 
-            {/* Match score */}
-            <div className="absolute top-3 right-3">
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full gold-gradient text-white text-xs font-bold shadow-sm">
-                <Star size={9} fill="white" />
-                {score}%
+            {/* Match score (only when available) */}
+            {score !== null && (
+              <div className="absolute top-3 right-3">
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full gold-gradient text-white text-xs font-bold shadow-sm">
+                  <Star size={9} fill="white" />
+                  {score}%
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Condition */}
             <div className="absolute top-3 left-3">
@@ -100,22 +103,24 @@ export default function CarCard({ car, matchScore, index = 0 }: CarCardProps) {
               <p className="text-xs text-muted mt-0.5">{car.year} · {car.bodyStyle}</p>
             </div>
 
-            {/* Match bar */}
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-[11px] text-muted font-medium">Match Score</span>
-                <span className="text-[11px] font-bold text-gold">{score}%</span>
+            {/* Match bar (only when score is available) */}
+            {score !== null && (
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-[11px] text-muted font-medium">Match Score</span>
+                  <span className="text-[11px] font-bold text-gold">{score}%</span>
+                </div>
+                <div className="h-1 rounded-full bg-[#a07850]/12 dark:bg-[#cba070]/10 overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full gold-gradient"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${score}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 + 0.25 }}
+                  />
+                </div>
               </div>
-              <div className="h-1 rounded-full bg-[#a07850]/12 dark:bg-[#cba070]/10 overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full gold-gradient"
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${score}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 + 0.25 }}
-                />
-              </div>
-            </div>
+            )}
 
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-2 mb-4">

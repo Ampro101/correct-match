@@ -21,6 +21,7 @@ import {
 import { getCarById, cars, formatPrice, getManufacturerUrl, getDealerSearchUrl } from "@/lib/cars";
 import CarCard from "@/components/CarCard";
 import CarImagePlaceholder from "@/components/CarImagePlaceholder";
+import AIChatWidget from "@/components/AIChatWidget";
 
 export default function CarDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -296,6 +297,9 @@ export default function CarDetailPage({ params }: { params: Promise<{ id: string
         </div>
 
         {/* Related cars */}
+        {/* AI Chat Widget */}
+        <AIChatWidget carMake={car.make} carModel={car.model} carYear={car.year} />
+
         {related.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-serif font-bold mb-6 text-[#2d2926] dark:text-[#e4ddd4]">

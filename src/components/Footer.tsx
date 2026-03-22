@@ -80,8 +80,8 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-subtle mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
-          <p>© 2024 CarFect Match. All rights reserved.</p>
-          <p>Crafted with care for car enthusiasts everywhere.</p>
+          <p>© 2026 CarFect Match. All rights reserved.</p>
+          <p>Powered by Claude AI · Crafted for car enthusiasts everywhere.</p>
         </div>
       </div>
     </footer>
